@@ -1,0 +1,15 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ SITE }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body>
+<div class="flags" aria-hidden="true">{% for i in range(40) %}<i style="--c:{{ ['#ff3d9a','#ffc93c','#27d3c3','#8b5cf6','#ff7a45'][i%5] }}"></i>{% endfor %}</div>
+<header class="top"><a class="brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='logo.png') }}" alt="Winxs do Forró" style="height:64px;width:auto;display:block"><span><b>{{ SITE }}</b><small>Marvel Rivals · central do time</small></span></a>
+<nav>{% for ep,lb in [('index','Início'),('scrims','Scrims'),('agenda','Agenda'),('players','Players'),('personagens','Personagens'),('desempenho','Desempenho'),('opcoes','Opções')] %}
+<a href="{{ url_for(ep) }}" class="{{ 'on' if request.endpoint==ep or (ep=='desempenho' and request.endpoint=='desempenho_player') }}">{{ lb }}</a>{% endfor %}</nav></header>
+<main>{% block body %}{% endblock %}</main>
+<footer>{{ SITE }} · site local em <b>http://WinxsForro</b></footer>
+<div id="lb" onclick="this.style.display='none'"><img alt=""></div>
+<script>document.querySelectorAll('.zoom').forEach(i=>i.onclick=()=>{const l=document.getElementById('lb');l.querySelector('img').src=i.src;l.style.display='flex'});</script>
+</body></html>

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}{% from '_m.html' import elo, res %}{% block body %}
+<section class="hero"><h1>{{ SITE }}</h1><p>Scrims, agenda, elos e desempenho das meninas em um lugar só.</p></section>
+<section class="stats">
+<div class="stat"><b>{{ tot }}</b><span>scrims registradas</span></div>
+<div class="stat win"><b>{{ v }}</b><span>vitórias</span></div>
+<div class="stat lose"><b>{{ d }}</b><span>derrotas</span></div>
+<div class="stat"><b>{{ wr }}%</b><span>aproveitamento</span></div></section>
+<div class="grid2">
+<section class="card"><h2>Próximas scrims</h2>
+{% for a in prox %}<div class="row"><div><b>{{ a.adversario }}</b><small>{{ a.data|br }} às {{ a.hora }} · {{ a.formato }}</small></div>{{ elo(a.elo_medio) }}</div>
+{% else %}<p class="empty">Nada marcado. <a href="{{ url_for('agenda') }}">Cadastre uma scrim na agenda.</a></p>{% endfor %}</section>
+<section class="card"><h2>Últimas scrims</h2>
+{% for s in ult %}<div class="row"><div><b>{{ s.adversario }}</b><small>{{ s.data|br }} · {{ s.formato }} {{ s.placar }}</small></div>{{ res(s.resultado) }}</div>
+{% else %}<p class="empty">Nenhuma scrim ainda. <a href="{{ url_for('scrims') }}">Registre a primeira.</a></p>{% endfor %}</section></div>
+<section class="card"><h2>Line up</h2><div class="lineup">
+{% for p in lineup %}<a class="mini-p" href="{{ url_for('desempenho_player', pid=p.id) }}"><b>{{ p.nick }}{% if p.capita %} ★{% endif %}</b><small>{{ p.funcao }}</small>{{ elo(p.elo, p.divisao) }}</a>{% endfor %}</div></section>
+{% endblock %}

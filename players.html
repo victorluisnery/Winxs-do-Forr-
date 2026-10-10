@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% from '_m.html' import elo, hero, opt_select, elo_select, del %}{% block body %}
+<div class="head"><h1>Players</h1></div>
+<details class="card" {{ 'open' if edit }}><summary class="btn">{{ 'Editando ' ~ edit.nick if edit else 'Adicionar player' }}</summary>
+<form method="post" class="form">{% if edit %}<input type="hidden" name="id" value="{{ edit.id }}">{% endif %}
+<label>Nick<input name="nick" required value="{{ edit.nick if edit }}"></label>
+<label>Nome<input name="nome" value="{{ edit.nome if edit }}"></label>
+<label>Elo{{ elo_select('elo', edit.elo if edit) }}</label>
+<label>Divisão<select name="divisao">{% for d in [3,2,1] %}<option {{ 'selected' if edit and edit.divisao==d }}>{{ d }}</option>{% endfor %}</select></label>
+<label>Plataforma{{ opt_select('plataforma','plataforma', edit.plataforma if edit) }}</label>
+<label>Posição no time<select name="status">{% for s in ['Line Up','Reserva'] %}<option {{ 'selected' if edit and edit.status==s }}>{{ s }}</option>{% endfor %}</select></label>
+<label>Função<select name="funcao">{% for f in FUNCOES %}<option {{ 'selected' if edit and edit.funcao==f }}>{{ f }}</option>{% endfor %}</select></label>
+<label class="check"><input type="checkbox" name="capita" {{ 'checked' if edit and edit.capita }}> Capitã / IGL</label>
+<fieldset class="wide"><legend>Personagens que joga</legend>
+{% for f in ['TANK','DPS','SUPORTE'] %}<div class="mapgroup"><h4 class="{{ f|lower }}">{{ f }}</h4>{% for h in heroes if h.funcao==f %}<label class="tog {{ f|lower }}"><input type="checkbox" name="herois" value="{{ h.id }}" {{ 'checked' if h.id in sel }}><span>{{ h.nome }}</span></label>{% endfor %}</div>{% endfor %}</fieldset>
+<div class="wide actions"><button class="btn primary">Salvar player</button>{% if edit %}<a class="btn" href="{{ url_for('players') }}">Cancelar</a>{% endif %}</div></form></details>
+<div class="cards pl">{% for p in ps %}<article class="card player {{ p.status|slug }}">
+<div class="ph"><div><h3>{{ p.nick }}{% if p.capita %} <span class="cap">★ IGL</span>{% endif %}</h3><small>{{ p.nome }}{% if p.nome %} · {% endif %}{{ p.status }}</small></div><span class="role {{ p.funcao|lower }}">{{ p.funcao }}</span></div>
+<div class="meta">{{ elo(p.elo, p.divisao) }}<span class="plat">{{ p.plataforma }}</span></div>
+<form method="post" action="{{ url_for('player_elo', i=p.id) }}" class="quick">{{ elo_select('elo', p.elo) }}<select name="divisao">{% for d in [3,2,1] %}<option {{ 'selected' if p.divisao==d }}>{{ d }}</option>{% endfor %}</select><button class="btn mini">Atualizar elo</button></form>
+<form method="post" action="{{ url_for('player_status', i=p.id) }}" class="quick"><select name="status" onchange="this.form.submit()" title="Mover para Line Up ou Reserva">{% for s in ['Line Up','Reserva'] %}<option {{ 'selected' if p.status==s }}>{{ s }}</option>{% endfor %}</select></form>
+<div class="chips">{% for h in pool[p.id] %}{{ hero(h.nome, h.funcao) }}{% endfor %}</div>
+<div class="act"><a class="btn mini" href="{{ url_for('desempenho_player', pid=p.id) }}">Desempenho</a><a class="btn mini" href="?edit={{ p.id }}">Editar</a>{{ del('players', p.id) }}</div></article>{% endfor %}</div>
+{% endblock %}

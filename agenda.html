@@ -1,0 +1,42 @@
+{% extends 'base.html' %}{% from '_m.html' import elo, opt_select, elo_select, del %}{% block body %}
+{% macro hora_select(name, atual, padrao, passo=30) %}
+{% set val = atual if atual else padrao %}
+{% set horas = [] %}
+{% for m in range(0, 1440, passo) %}{% set _ = horas.append('%02d:%02d' % (m // 60, m % 60)) %}{% endfor %}
+{% if val not in horas %}{% set horas = (horas + [val])|sort %}{% endif %}
+<select name="{{ name }}" required>{% for h in horas %}<option value="{{ h }}" {{ 'selected' if h == val }}>{{ h }}</option>{% endfor %}</select>
+{% endmacro %}
+
+{% macro data_select(atual, hoje) %}
+{% set d = atual if atual else hoje %}
+{% set a = d[:4]|int %}{% set m = d[5:7] %}{% set di = d[8:10] %}
+{% set ano_hoje = hoje[:4]|int %}
+{% set meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'] %}
+<span style="display:flex;gap:8px">
+<select name="dia" required style="flex:1;min-width:0">{% for i in range(1, 32) %}{% set v = '%02d' % i %}<option value="{{ v }}" {{ 'selected' if v == di }}>{{ v }}</option>{% endfor %}</select>
+<select name="mes" required style="flex:2;min-width:0">{% for nome in meses %}{% set v = '%02d' % loop.index %}<option value="{{ v }}" {{ 'selected' if v == m }}>{{ nome }}</option>{% endfor %}</select>
+<select name="ano" required style="flex:1.2;min-width:0">{% for y in range([a, ano_hoje]|min - 1, [a, ano_hoje]|max + 3) %}<option value="{{ y }}" {{ 'selected' if y == a }}>{{ y }}</option>{% endfor %}</select>
+</span>
+{% endmacro %}
+
+<div class="head"><h1>Agenda de scrims</h1></div>
+<details class="card" {{ 'open' if edit else '' }}><summary class="btn">{{ 'Editando agendamento' if edit else 'Agendar nova scrim' }}</summary>
+<form method="post" class="form">{% if edit %}<input type="hidden" name="id" value="{{ edit.id }}">{% endif %}
+<label>Time adversário<input name="adversario" required value="{{ edit.adversario if edit }}"></label>
+<label>Média de elo{{ elo_select('elo_medio', edit.elo_medio if edit) }}</label>
+<label>Tipo de scrim{{ opt_select('origem','origem', edit.origem if edit) }}</label>
+<label>Formato{{ opt_select('formato','formato', edit.formato if edit) }}</label>
+<label>Dia / Mês / Ano{{ data_select(edit.data if edit, hoje) }}</label>
+<div class="time-range wide">
+<label>Horário de início{{ hora_select('hora_inicio', edit.hora_inicio if edit, '20:00') }}</label>
+<label>Horário de fim{{ hora_select('hora_fim', edit.hora_fim if edit, '21:00') }}</label>
+</div>
+<label>Status<select name="status">{% for s in STATUS_AGENDA %}<option {{ 'selected' if edit and edit.status==s }}>{{ s }}</option>{% endfor %}</select></label>
+<label class="wide">Observações<textarea name="obs" rows="2">{{ edit.obs if edit }}</textarea></label>
+<div class="wide actions"><button class="btn primary">Salvar na agenda</button>{% if edit %}<a class="btn" href="{{ url_for('agenda') }}">Cancelar</a>{% endif %}</div>
+</form></details>
+<div class="cards">{% for a in rows %}<article class="card ag {{ a.status|lower }}"><div class="date"><b>{{ a.data[8:10] if a.data }}</b><span>{{ a.data[5:7] if a.data }}/{{ a.data[:4] }}</span></div>
+<div class="body"><h3>{{ a.adversario }}</h3><p>{{ a.hora_inicio }}–{{ a.hora_fim }} · {{ a.formato }} · {{ a.origem.replace('Scrim contra ','') }}</p>{{ elo(a.elo_medio) }}{% if a.obs %}<p class="note">{{ a.obs }}</p>{% endif %}<small class="status">{{ a.status }}</small></div>
+<div class="act">{% if a.status=='Agendada' %}<form method="post" action="{{ url_for('virar', i=a.id) }}"><button class="btn mini primary">Marcar como jogada</button></form>{% endif %}<a class="btn mini" href="?edit={{ a.id }}">Editar</a>{{ del('agenda', a.id) }}</div></article>
+{% else %}<p class="empty card">Agenda vazia. Agende a primeira scrim acima.</p>{% endfor %}</div>
+{% endblock %}

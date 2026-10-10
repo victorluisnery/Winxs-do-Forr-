@@ -1,0 +1,21 @@
+{% extends 'base.html' %}{% block body %}
+<section class="card" style="max-width:440px;margin:56px auto">
+{% if modo == 'bloqueado' %}
+<h1 style="font-size:1.8rem">Senha ainda não criada</h1>
+<p>Por segurança, a senha só pode ser criada no computador onde o site está instalado. Rode <b>python definir_senha.py</b> no terminal da pasta do site e depois entre aqui.</p>
+{% else %}
+<h1 style="font-size:1.8rem">{{ {'criar':'Criar senha do time','entrar':'Entrar','trocar':'Alterar senha'}[modo] }}</h1>
+{% if modo == 'criar' %}<p style="color:var(--mut,#aaa)">Essa é a senha que vocês vão usar para entrar no site. Escolha uma que só o time saiba.</p>{% endif %}
+{% if erro %}<p style="color:#ff9db3;font-weight:700">{{ erro }}</p>{% endif %}
+{% if ok %}<p style="color:#3fe0a0;font-weight:700">{{ ok }}</p>{% endif %}
+<form method="post" class="form" style="grid-template-columns:1fr">
+{% if modo == 'entrar' %}<input type="hidden" name="next" value="{{ next }}"><label>Senha<input type="password" name="senha" required autofocus autocomplete="current-password"></label>
+{% elif modo == 'criar' %}<label>Nova senha (mínimo 6 caracteres)<input type="password" name="senha" required minlength="6" autofocus autocomplete="new-password"></label>
+<label>Repita a senha<input type="password" name="confirma" required minlength="6" autocomplete="new-password"></label>
+{% else %}<label>Senha atual<input type="password" name="atual" required autofocus autocomplete="current-password"></label>
+<label>Nova senha (mínimo 6 caracteres)<input type="password" name="nova" required minlength="6" autocomplete="new-password"></label>
+<label>Repita a nova senha<input type="password" name="confirma" required minlength="6" autocomplete="new-password"></label>{% endif %}
+<div class="actions"><button class="btn primary">{{ {'criar':'Salvar senha','entrar':'Entrar','trocar':'Alterar senha'}[modo] }}</button></div>
+</form>
+{% endif %}
+</section>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% from '_m.html' import del, hero %}{% block body %}
+<div class="head"><h1>Personagens por função</h1></div>
+<form method="post" class="card inline"><input name="nome" placeholder="Nome do novo personagem" required><select name="funcao"><option>TANK</option><option>DPS</option><option>SUPORTE</option></select><button class="btn primary">Adicionar</button></form>
+<div class="cols3">{% for f, lst in cols.items() %}<section class="card col {{ f|lower }}"><h2>{{ f }} <small>{{ lst|length }}</small></h2>
+{% for h in lst %}<div class="hrow">{{ hero(h.nome, f, 36) }}
+<form method="post" action="{{ url_for('hero_role', i=h.id) }}"><select name="funcao" onchange="this.form.submit()" title="Mudar função">{% for o in ['TANK','DPS','SUPORTE'] %}<option {{ 'selected' if o==f }}>{{ o }}</option>{% endfor %}</select></form>{{ del('heroes', h.id) }}</div>{% endfor %}</section>{% endfor %}</div>
+{% endblock %}

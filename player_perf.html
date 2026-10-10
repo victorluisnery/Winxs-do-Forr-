@@ -1,0 +1,33 @@
+{% extends 'base.html' %}{% from '_m.html' import elo, hero, prints, prints_edit, del %}{% block body %}
+<div class="head"><a class="back" href="{{ url_for('desempenho') }}">‹ Todas as players</a><h1>{{ p.nick }} <small>{{ p.nome }}</small></h1>{{ elo(p.elo, p.divisao) }} <span class="role {{ p.funcao|lower }}">{{ p.funcao }}</span></div>
+<section class="stats">
+<div class="stat"><b>{{ tot.k }} / {{ tot.d }} / {{ tot.a }}</b><span>K / D / A</span></div>
+<div class="stat"><b>{{ '%.2f'|format((tot.k+tot.a)/(tot.d if tot.d else 1)) }}</b><span>KDA</span></div>
+<div class="stat"><b>{{ ('%.1f%%'|format(tot.prec)) if tot.prec else '-' }}</b><span>precisão média</span></div>
+<div class="stat"><b>{{ tot.tempo|tempo }}</b><span>tempo em scrims</span></div></section>
+<section class="card"><h2>Medalhas</h2><div class="medals">{% for c, nome in MEDALHAS %}<div class="medal"><b>{{ tot[c] }}</b><span>{{ nome }}</span></div>{% endfor %}</div></section>
+<section class="card"><h2>Tempo por personagem</h2>
+{% if por_heroi %}<div class="tablewrap"><table><thead><tr><th>Personagem</th><th>Partidas</th><th>Tempo</th><th>K / D / A</th><th>KDA</th><th>Precisão</th></tr></thead><tbody>
+{% for h in por_heroi %}<tr><td>{{ hero(h.heroi, h.funcao) }}</td><td>{{ h.n }}</td><td>{{ h.tempo|tempo }}</td><td>{{ h.k }} / {{ h.d }} / {{ h.a }}</td><td>{{ '%.2f'|format((h.k+h.a)/(h.d if h.d else 1)) }}</td><td>{{ ('%.1f%%'|format(h.prec)) if h.prec else '-' }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<p class="empty">Sem registros ainda. Adicione a primeira partida abaixo.</p>{% endif %}</section>
+<details class="card" {{ 'open' if edit }}><summary class="btn">{{ 'Editando registro' if edit else 'Registrar desempenho de uma partida' }}</summary>
+<form method="post" enctype="multipart/form-data" class="form">{% if edit %}<input type="hidden" name="id" value="{{ edit.id }}">{% endif %}
+<label>Personagem<select name="heroi">{% for h in heroes %}<option {{ 'selected' if edit and edit.heroi==h.nome }}>{{ h.nome }}</option>{% endfor %}</select></label>
+<label>Scrim (opcional)<select name="scrim_id"><option value="">Sem vínculo</option>{% for s in scrims %}<option value="{{ s.id }}" {{ 'selected' if edit and edit.scrim_id==s.id }}>{{ s.data|br }} · {{ s.adversario }}</option>{% endfor %}</select></label>
+<label>Dia<input type="date" name="data" value="{{ edit.data if edit else hoje }}"></label>
+<label>Kills<input type="number" min="0" name="k" value="{{ edit.k if edit else 0 }}"></label>
+<label>Mortes<input type="number" min="0" name="d" value="{{ edit.d if edit else 0 }}"></label>
+<label>Assistências<input type="number" min="0" name="a" value="{{ edit.a if edit else 0 }}"></label>
+<label>Tempo jogado (minutos)<input type="number" min="0" name="tempo" value="{{ edit.tempo if edit else 0 }}"></label>
+<label>Precisão de tiro (%)<input type="number" step="0.1" min="0" max="100" name="precisao" value="{{ edit.precisao if edit else 0 }}"></label>
+<fieldset class="wide"><legend>Medalhas (quantas vezes)</legend><div class="medalin">{% for c, nome in MEDALHAS %}<label>{{ nome }}<input type="number" min="0" name="{{ c }}" value="{{ edit[c] if edit else 0 }}"></label>{% endfor %}</div></fieldset>
+<label class="wide">Observações<textarea name="obs" rows="2">{{ edit.obs if edit }}</textarea></label>
+<div class="wide"><label>Prints (resultado, desempenho…)<input type="file" name="prints" accept="image/*" multiple></label>{{ prints_edit(edit.prints) if edit }}</div>
+<div class="wide actions"><button class="btn primary">Salvar registro</button>{% if edit %}<a class="btn" href="{{ url_for('desempenho_player', pid=p.id) }}">Cancelar</a>{% endif %}</div></form></details>
+<h2 class="sec">Histórico</h2>
+<div class="cards">{% for r in regs %}<article class="card reg"><div class="rh">{{ hero(r.heroi, r.funcao) }}<small>{{ r.data|br }}{% if r.adversario %} · vs {{ r.adversario }}{% endif %}</small></div>
+<p class="line"><b>{{ r.k }}/{{ r.d }}/{{ r.a }}</b> KDA {{ r|kda }} · {{ r.tempo|tempo }} · precisão {{ r.precisao }}%</p>
+<p class="medline">{% for c, nome in MEDALHAS if r[c] %}<span class="map">{{ nome }} ×{{ r[c] }}</span>{% endfor %}</p>{% if r.obs %}<p class="note">{{ r.obs }}</p>{% endif %}{{ prints(r.prints) }}
+<div class="act"><a class="btn mini" href="?edit={{ r.id }}">Editar</a>{{ del('performance', r.id) }}</div></article>
+{% else %}<p class="empty card">Nenhum registro ainda.</p>{% endfor %}</div>
+{% endblock %}

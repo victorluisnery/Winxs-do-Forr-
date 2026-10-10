@@ -1,0 +1,17 @@
+{# _m.html RECONSTRUÍDO — macros usadas pelas páginas #}
+
+{% macro elo(e, divisao=None) %}<span class="elo {{ (e or '')|slug }}">{{ e }}{% if divisao %} {{ divisao }}{% endif %}</span>{% endmacro %}
+
+{% macro res(r) %}<span class="res {{ (r or '')|slug }}">{{ r }}</span>{% endmacro %}
+
+{% macro hero(nome, funcao='', tam=26) %}{% set img = hero_img(nome) %}<span class="chip {{ (funcao or '')|lower }}">{% if img %}<img src="{{ img }}" alt="{{ nome }}" style="width:{{ tam }}px;height:{{ tam }}px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px">{% endif %}{{ nome }}</span>{% endmacro %}
+
+{% macro opt_select(name, cat, atual=None) %}<select name="{{ name }}">{% for o in opts(cat) %}<option {{ 'selected' if atual == o.valor }}>{{ o.valor }}</option>{% endfor %}</select>{% endmacro %}
+
+{% macro elo_select(name, atual=None) %}<select name="{{ name }}">{% for o in opts('elo') %}<option {{ 'selected' if atual == o.valor }}>{{ o.valor }}</option>{% endfor %}</select>{% endmacro %}
+
+{% macro prints(lista) %}{% for n in (lista or '').split(',') if n %}<a href="{{ url_for('uploaded', f=n) }}" target="_blank"><img src="{{ url_for('uploaded', f=n) }}" alt="print" style="height:36px;border-radius:4px;margin-right:4px"></a>{% endfor %}{% endmacro %}
+
+{% macro prints_edit(lista) %}{% if lista %}<div class="prints-edit">{% for n in lista.split(',') if n %}<label class="tog"><input type="checkbox" name="rm" value="{{ n }}"><span>Remover <img src="{{ url_for('uploaded', f=n) }}" alt="print" style="height:36px;vertical-align:middle"></span></label>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro del(tabela, id) %}<form method="post" action="{{ url_for('delete', t=tabela, i=id) }}" style="display:inline" onsubmit="return confirm('Excluir este registro?')"><button class="btn mini danger">Excluir</button></form>{% endmacro %}

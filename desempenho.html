@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% from '_m.html' import elo %}{% block body %}
+<div class="head"><h1>Desempenho</h1><p>Escolha uma player para ver o histórico, registrar partidas e anexar prints.</p></div>
+<div class="cards pl">{% for p in rows %}<a class="card player {{ p.status|slug }} link" href="{{ url_for('desempenho_player', pid=p.id) }}">
+<div class="ph"><div><h3>{{ p.nick }}</h3><small>{{ p.nome }}{% if p.nome %} · {% endif %}{{ p.status }}</small></div><span class="role {{ p.funcao|lower }}">{{ p.funcao }}</span></div>
+{{ elo(p.elo, p.divisao) }}
+<dl class="kv"><div><dt>Registros</dt><dd>{{ p.n }}</dd></div><div><dt>K / D / A</dt><dd>{{ p.k }} / {{ p.d }} / {{ p.a }}</dd></div>
+<div><dt>KDA</dt><dd>{{ '%.2f'|format((p.k+p.a)/(p.d if p.d else 1)) }}</dd></div><div><dt>Precisão</dt><dd>{{ ('%.1f%%'|format(p.prec)) if p.prec else '-' }}</dd></div>
+<div><dt>Tempo</dt><dd>{{ p.tempo|tempo }}</dd></div><div><dt>Medalhas</dt><dd>{{ p.medalhas }}</dd></div></dl></a>{% endfor %}</div>
+{% endblock %}

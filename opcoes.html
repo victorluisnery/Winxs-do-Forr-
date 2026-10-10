@@ -1,0 +1,90 @@
+
+{% extends 'base.html' %}
+{% from '_m.html' import del %}
+{% block body %}
+
+<div class="head">
+    <h1>Opções editáveis</h1>
+    <p>Adicione, troque ou remova elos, mapas, formatos e tipos de scrim. Os formulários do site usam essas listas.</p>
+</div>
+
+<div class="cols3">
+    {% for c, nome in cats %}
+    <section class="card">
+        <h2>{{ nome }}</h2>
+
+        {% for o in opts(c) %}
+        <div class="hrow" style="display:block; margin-bottom:12px;">
+
+            <form method="post" class="inline"
+                  style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+
+                <input type="hidden" name="acao" value="trocar">
+                <input type="hidden" name="id" value="{{ o.id }}">
+                <input type="hidden" name="categoria" value="{{ c }}">
+
+                <input
+                    name="valor"
+                    value="{{ o.valor }}"
+                    placeholder="Nome da opção"
+                    required
+                    style="flex:1; min-width:100px;"
+                >
+
+                {% if c == 'mapa' %}
+                <select name="extra">
+                    {% for m in modos %}
+                    <option value="{{ m }}" {{ 'selected' if m == o.extra else '' }}>
+                        {{ m }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <input type="hidden" name="extra" value="{{ o.extra or '' }}">
+                {% endif %}
+
+                <button class="btn mini primary" type="submit">
+                    Trocar
+                </button>
+            </form>
+
+            <div style="margin-top:6px;">
+                {{ del('options', o.id) }}
+            </div>
+
+        </div>
+        {% endfor %}
+
+        <form method="post" class="inline"
+              style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;">
+
+            <input type="hidden" name="acao" value="adicionar">
+            <input type="hidden" name="categoria" value="{{ c }}">
+
+            <input
+                name="valor"
+                placeholder="Novo item"
+                required
+                style="flex:1; min-width:100px;"
+            >
+
+            {% if c == 'mapa' %}
+            <select name="extra">
+                {% for m in modos %}
+                <option value="{{ m }}">{{ m }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <input type="hidden" name="extra" value="">
+            {% endif %}
+
+            <button class="btn mini primary" type="submit">
+                Adicionar
+            </button>
+        </form>
+
+    </section>
+    {% endfor %}
+</div>
+
+{% endblock %}
